@@ -359,8 +359,69 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                     Imgproc.putText(frame,cocoNames.get(idGuy) + " " + intConf + "%",box.tl(),Core.FONT_HERSHEY_SIMPLEX, 2, new Scalar(255,255,0),2);
                     String className = cocoNames.get(idGuy).toString();
-                    speak(className);
 
+//                    if(detected.contains(className)){
+//
+//                    }
+//                    else {
+//                        //find positions
+//                        //int centerX, centerY = centers[idGuy][0], centers[idGuy][1];
+//                        //int centerX = (int) pz.get(i).first;
+//                        int centerX = valueX.get(i);
+//                        int centerY = (int) pz.get(i).second;
+//                        String W_pos, H_pos;
+//
+//                        if (centerX <= W / 3) {
+//                            W_pos = "left ";
+//                        } else if (centerX <= ((W / 3) * 2)) {
+//                            W_pos = "center ";
+//                        } else {
+//                            W_pos = "right ";
+//                        }
+////                        if (centerY <= H / 3) {
+////                            H_pos = "top ";
+////                        } else if (centerY <= (H / 3 * 2)) {
+////                            H_pos = "mid ";
+////                        } else {
+////                            H_pos = "bottom ";
+////                        }
+////                        speak(H_pos + W_pos + className);
+//                        text.add(className + W_pos);
+//                        detected.add(className);
+
+
+                   int centerX = valueX.get(i);
+                    int centerY = (int) pz.get(i).second;
+                    String W_pos, H_pos;
+
+                    if (centerX <= W / 3) {
+                        W_pos = " left";
+                    } else if (centerX <= ((W / 3) * 2)) {
+                        W_pos = " centre";
+                    } else {
+                        W_pos = " right";
+                    }
+                    text.add(className + W_pos);
+
+                    Imgproc.rectangle(frame, box.tl(), box.br(), new Scalar(255, 0, 0), 2);
+                }
+                 if(text.size()>0){
+                    try{
+
+                        String description = text.toString();
+                        speak(description);
+                        Thread.sleep(1000);
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+//                        String description = text.toString();
+//                        speak(description);
+
+                
+            
+                }
+            }
 
 
 
