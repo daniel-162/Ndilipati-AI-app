@@ -140,11 +140,43 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         });
 
+        //stt
 
+
+//        String className = cocoNames.get(idGuy);
+        //     mButtonSpeak.setOnClickListener(new View.OnClickListener() {
+        //         @Override
+        //         public void onClick(View v) {
+        //             speak();
+        //         }
+        //     });
+        // }
 
     }
-   
-    
+    private void speak(String text) {
+
+        //float pitch = (float) mSeekBarPitch.getProgress() / 50;
+        // if (pitch < 0.1) pitch = 0.1f;
+        // float speed = (float) mSeekBarSpeed.getProgress() / 50;
+        // if (speed < 0.1) speed = 0.1f;
+        mTTS.setPitch(0.8f);
+        mTTS.setSpeechRate(1.0f);
+        mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+    }
+
+    //tts
+    public void getSpeechInput(View view) {
+
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, 10);
+        } else {
+            Toast.makeText(this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -327,10 +359,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                     Imgproc.putText(frame,cocoNames.get(idGuy) + " " + intConf + "%",box.tl(),Core.FONT_HERSHEY_SIMPLEX, 2, new Scalar(255,255,0),2);
                     String className = cocoNames.get(idGuy).toString();
+                    speak(className);
 
-
-                }
-            }
 
 
 
@@ -344,3 +374,60 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         return frame;
     }
+
+    @Override
+    public void onCameraViewStarted(int width, int height) {
+
+
+        if (startYolo == true){
+
+            String tinyYoloCfg = Environment.getExternalStorageDirectory() + "/dnns/yolov3-tiny.cfg" ;
+            String tinyYoloWeights = Environment.getExternalStorageDirectory() + "/dnns/yolov3-tiny.weights";
+
+            tinyYolo = Dnn.readNetFromDarknet(tinyYoloCfg, tinyYoloWeights);
+
+
+        }
+
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!OpenCVLoader.initDebug()){
+            Toast.makeText(getApplicationContext(),"Error!!!", Toast.LENGTH_SHORT).show();
+        }
+
+        else
+        {
+            baseLoaderCallback.onManagerConnected(baseLoaderCallback.SUCCESS);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(cameraBridgeViewBase!=null){
+
+            cameraBridgeViewBase.disableView();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (cameraBridgeViewBase!=null){
+            cameraBridgeViewBase.disableView();
+        }
+        if (mTTS != null) {
+            mTTS.stop();
+            mTTS.shutdown();
+        }
+    }
+}
