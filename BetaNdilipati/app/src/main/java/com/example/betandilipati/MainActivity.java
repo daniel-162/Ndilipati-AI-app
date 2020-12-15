@@ -35,6 +35,35 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+//tts
+import android.speech.tts.TextToSpeech;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import java.util.Locale;
+import android.util.Pair;
+
+//stt
+import android.content.Intent;
+import android.speech.RecognizerIntent;
+import android.widget.Toast;
+
+//class Pair<L,R> {
+//    private L l;
+//    private R r;
+//    public Pair(L l, R r){
+//        this.l = l;
+//        this.r = r;
+//    }
+//    public L getL(){ return l; }
+//    public R getR(){ return r; }
+//    public void setL(L l){ this.l = l; }
+//    public void setR(R r){ this.r = r; }
+//}
+
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     CameraBridgeViewBase cameraBridgeViewBase;
     BaseLoaderCallback baseLoaderCallback;
@@ -42,7 +71,9 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     boolean startYolo = false;
     boolean firstTimeYolo = false;
     Net tinyYolo;
-   
+    //tts
+    private TextToSpeech mTTS;
+//    private EditText mEditText;
 
     public void YOLO (View Button){
         if(startYolo == false){
@@ -91,4 +122,225 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
 
         };
-        
+        //tts
+        //setContentView(R.layout.activity_main);
+        // mButtonSpeak = findViewById(R.id.button_speak);
+        mTTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = mTTS.setLanguage(Locale.ENGLISH);
+                    if (result == TextToSpeech.LANG_MISSING_DATA
+                            || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e("TTS", "Language not supported");
+                    }
+                } else {
+                    Log.e("TTS", "Initialization failed");
+                }
+            }
+        });
+
+
+
+    }
+   
+    
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case 10:
+                if (resultCode == RESULT_OK && data != null) {
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+                }
+                break;
+        }
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Mat frame = inputFrame.rgba();
+//        if(counter % 2 == 0){
+//            Core.flip(frame, frame, 1);
+//            Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGBA2GRAY);
+//
+//        }
+//        counter += 1;
+        //edge detection
+//        if(startYolo == false){
+//            //convert to grayscale
+//            Imgproc.cvtColor(frame, frame,Imgproc.COLOR_RGBA2GRAY);
+//            //add blur
+//            // Imgproc.blur(frame, frame, new Size(3,3))
+//            //edge detection
+//            Imgproc.Canny(frame, frame, 100, 80);
+//        }
+
+        if (startYolo == true) {
+
+            Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGBA2RGB);
+            System.out.println("Here!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println(frame);
+            System.out.println(frame.height());
+            System.out.println(frame.width());
+            //Extract Height and Width from frame
+            int H,W;
+            H = frame.height();
+            W = frame.width();
+
+
+
+
+
+            Mat imageBlob = Dnn.blobFromImage(frame, 0.00392, new Size(416,416),new Scalar(0, 0, 0),/*swapRB*/false, /*crop*/false);
+
+
+            tinyYolo.setInput(imageBlob);
+
+
+
+            java.util.List<Mat> result = new java.util.ArrayList<Mat>(2);
+
+            List<String> outBlobNames = new java.util.ArrayList<>();
+            outBlobNames.add(0, "yolo_16");
+            outBlobNames.add(1, "yolo_23");
+
+            tinyYolo.forward(result,outBlobNames);
+
+
+            float confThreshold = 0.5f;
+
+
+
+            List<Integer> clsIds = new ArrayList<>();
+            List<Float> confs = new ArrayList<>();
+            List<Rect> rects = new ArrayList<>();
+            //List<Integer> centers = new ArrayList<>();
+            Pair centers;
+            List<Integer> valueX = new ArrayList<>();
+            List<String> detected = new ArrayList<>();
+            List<Pair> pz = new ArrayList<Pair>();
+            List<String> text = new ArrayList<>();
+
+
+
+
+            for (int i = 0; i < result.size(); ++i)
+            {
+
+                Mat level = result.get(i);
+
+                for (int j = 0; j < level.rows(); ++j)
+                {
+                    Mat row = level.row(j);
+                    Mat scores = row.colRange(5, level.cols());
+
+                    Core.MinMaxLocResult mm = Core.minMaxLoc(scores);
+
+
+
+
+                    float confidence = (float)mm.maxVal;
+
+
+                    Point classIdPoint = mm.maxLoc;
+
+
+
+                    if (confidence > confThreshold)
+                    {
+                        int centerX = (int)(row.get(0,0)[0] * frame.cols());
+                        int centerY = (int)(row.get(0,1)[0] * frame.rows());
+                        int width   = (int)(row.get(0,2)[0] * frame.cols());
+                        int height  = (int)(row.get(0,3)[0] * frame.rows());
+
+
+                        int left    = centerX - width  / 2;
+                        int top     = centerY - height / 2;
+
+                        clsIds.add((int)classIdPoint.x);
+                        confs.add((float)confidence);
+                        Pair value = new Pair(centerX, centerY);
+
+                        pz.add(value);
+                        valueX.add(centerX);
+                        //centers.add(value);
+                        System.out.println("AGAIN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        System.out.println(pz);
+
+
+
+
+                        rects.add(new Rect(left, top, width, height));
+                    }
+                }
+            }
+            int ArrayLength = confs.size();
+
+            if (ArrayLength>=1) {
+                // Apply non-maximum suppression procedure.
+                float nmsThresh = 0.3f;
+
+
+
+
+                MatOfFloat confidences = new MatOfFloat(Converters.vector_float_to_Mat(confs));
+
+
+                Rect[] boxesArray = rects.toArray(new Rect[0]);
+
+                MatOfRect boxes = new MatOfRect(boxesArray);
+
+                MatOfInt indices = new MatOfInt();
+
+
+
+                Dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThresh, indices);
+
+
+                // Draw result boxes:
+                int[] ind = indices.toArray();
+                for (int i = 0; i < ind.length; ++i) {
+
+                    int idx = ind[i];
+                    Rect box = boxesArray[idx];
+
+                    int idGuy = clsIds.get(idx);
+
+                    float conf = confs.get(idx);
+
+
+
+
+
+
+                    List<String> cocoNames = Arrays.asList("person", "phone");
+                    //List<String> cocoNames = Arrays.asList("person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "doughnut", "cake", "chair", "sofa", "potted plant", "bed", "dining table", "toilet", "TV monitor", "laptop", "computer mouse", "remote control", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "pair of scissors", "teddy bear", "hair drier", "toothbrush");
+
+
+                    int intConf = (int) (conf * 100);
+
+
+
+                    Imgproc.putText(frame,cocoNames.get(idGuy) + " " + intConf + "%",box.tl(),Core.FONT_HERSHEY_SIMPLEX, 2, new Scalar(255,255,0),2);
+                    String className = cocoNames.get(idGuy).toString();
+
+
+                }
+            }
+
+
+
+
+
+
+
+
+
+        }
+
+        return frame;
+    }
