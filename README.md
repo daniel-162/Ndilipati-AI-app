@@ -16,7 +16,7 @@ The app uses tflite models which are build using gradle scripts and no need to d
 2. open android studio and open GammaNdilipati as project
 3. Run the app from android studio once your android device is connected 
 
-## For GammaNdilipati
+## For BetaNdilipati
 The app uses yolo tiny models which are build by copying dnns folder to your android device.
 ### requirements
 1. android studio
