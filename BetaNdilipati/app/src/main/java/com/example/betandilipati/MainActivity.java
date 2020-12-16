@@ -51,18 +51,6 @@ import android.content.Intent;
 import android.speech.RecognizerIntent;
 import android.widget.Toast;
 
-//class Pair<L,R> {
-//    private L l;
-//    private R r;
-//    public Pair(L l, R r){
-//        this.l = l;
-//        this.r = r;
-//    }
-//    public L getL(){ return l; }
-//    public R getR(){ return r; }
-//    public void setL(L l){ this.l = l; }
-//    public void setR(R r){ this.r = r; }
-//}
 
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     CameraBridgeViewBase cameraBridgeViewBase;
@@ -73,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     Net tinyYolo;
     //tts
     private TextToSpeech mTTS;
-//    private EditText mEditText;
+
 
     public void YOLO (View Button){
         if(startYolo == false){
@@ -123,8 +111,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         };
         //tts
-        //setContentView(R.layout.activity_main);
-        // mButtonSpeak = findViewById(R.id.button_speak);
         mTTS = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -140,25 +126,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             }
         });
 
-        //stt
 
-
-//        String className = cocoNames.get(idGuy);
-        //     mButtonSpeak.setOnClickListener(new View.OnClickListener() {
-        //         @Override
-        //         public void onClick(View v) {
-        //             speak();
-        //         }
-        //     });
-        // }
 
     }
     private void speak(String text) {
 
-        //float pitch = (float) mSeekBarPitch.getProgress() / 50;
-        // if (pitch < 0.1) pitch = 0.1f;
-        // float speed = (float) mSeekBarSpeed.getProgress() / 50;
-        // if (speed < 0.1) speed = 0.1f;
         mTTS.setPitch(0.8f);
         mTTS.setSpeechRate(1.0f);
         mTTS.speak(text, TextToSpeech.QUEUE_FLUSH, null);
@@ -195,21 +167,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat frame = inputFrame.rgba();
-//        if(counter % 2 == 0){
-//            Core.flip(frame, frame, 1);
-//            Imgproc.cvtColor(frame, frame, Imgproc.COLOR_RGBA2GRAY);
-//
-//        }
-//        counter += 1;
-        //edge detection
-//        if(startYolo == false){
-//            //convert to grayscale
-//            Imgproc.cvtColor(frame, frame,Imgproc.COLOR_RGBA2GRAY);
-//            //add blur
-//            // Imgproc.blur(frame, frame, new Size(3,3))
-//            //edge detection
-//            Imgproc.Canny(frame, frame, 100, 80);
-//        }
 
         if (startYolo == true) {
 
@@ -250,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             List<Integer> clsIds = new ArrayList<>();
             List<Float> confs = new ArrayList<>();
             List<Rect> rects = new ArrayList<>();
-            //List<Integer> centers = new ArrayList<>();
+
             Pair centers;
             List<Integer> valueX = new ArrayList<>();
             List<String> detected = new ArrayList<>();
@@ -299,9 +256,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
                         pz.add(value);
                         valueX.add(centerX);
-                        //centers.add(value);
-                        System.out.println("AGAIN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        System.out.println(pz);
+
 
 
 
@@ -350,7 +305,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
 
                     List<String> cocoNames = Arrays.asList("person", "phone");
-                    //List<String> cocoNames = Arrays.asList("person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "doughnut", "cake", "chair", "sofa", "potted plant", "bed", "dining table", "toilet", "TV monitor", "laptop", "computer mouse", "remote control", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "pair of scissors", "teddy bear", "hair drier", "toothbrush");
 
 
                     int intConf = (int) (conf * 100);
@@ -360,37 +314,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     Imgproc.putText(frame,cocoNames.get(idGuy) + " " + intConf + "%",box.tl(),Core.FONT_HERSHEY_SIMPLEX, 2, new Scalar(255,255,0),2);
                     String className = cocoNames.get(idGuy).toString();
 
-
-//                    if(detected.contains(className)){
-//
-//                    }
-//                    else {
-//                        //find positions
-//                        //int centerX, centerY = centers[idGuy][0], centers[idGuy][1];
-//                        //int centerX = (int) pz.get(i).first;
-//                        int centerX = valueX.get(i);
-//                        int centerY = (int) pz.get(i).second;
-//                        String W_pos, H_pos;
-//
-//                        if (centerX <= W / 3) {
-//                            W_pos = "left ";
-//                        } else if (centerX <= ((W / 3) * 2)) {
-//                            W_pos = "center ";
-//                        } else {
-//                            W_pos = "right ";
-//                        }
-////                        if (centerY <= H / 3) {
-////                            H_pos = "top ";
-////                        } else if (centerY <= (H / 3 * 2)) {
-////                            H_pos = "mid ";
-////                        } else {
-////                            H_pos = "bottom ";
-////                        }
-////                        speak(H_pos + W_pos + className);
-//                        text.add(className + W_pos);
-//                        detected.add(className);
-//
-//                    }
                     int centerX = valueX.get(i);
                     int centerY = (int) pz.get(i).second;
                     String W_pos, H_pos;
@@ -402,15 +325,15 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     } else {
                         W_pos = " right";
                     }
-//                        if (centerY <= H / 3) {
-//                            H_pos = "top ";
-//                        } else if (centerY <= (H / 3 * 2)) {
-//                            H_pos = "mid ";
-//                        } else {
-//                            H_pos = "bottom ";
-//                        }
-//                        speak(H_pos + W_pos + className);
-                    text.add(className + W_pos);
+                        if (centerY <= H / 3) {
+                            H_pos = "top ";
+                        } else if (centerY <= (H / 3 * 2)) {
+                            H_pos = "mid ";
+                        } else {
+                            H_pos = "bottom ";
+                        }
+
+                    text.add(className + W_pos + H_pos);
 
                     Imgproc.rectangle(frame, box.tl(), box.br(), new Scalar(255, 0, 0), 2);
                 }
@@ -424,8 +347,6 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-//                        String description = text.toString();
-//                        speak(description);
 
                 }
             }
