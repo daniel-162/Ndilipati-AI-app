@@ -16,7 +16,7 @@
 
 package org.tensorflow.lite.examples.detection;
 
-import android.content.res.Resources;
+
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -27,14 +27,11 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
-import android.os.SystemClock;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -60,8 +57,6 @@ import android.speech.tts.TextToSpeech;
 public class DetectorActivity<protect> extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
   private TextToSpeech mTTS;
-//  int width  = Resources.getSystem().getDisplayMetrics().widthPixels;
-//  int height = Resources.getSystem().getDisplayMetrics().heightPixels;
 
   // Configuration values for the prepackaged SSD model.
   private static final int TF_OD_API_INPUT_SIZE = 300;
@@ -70,7 +65,7 @@ public class DetectorActivity<protect> extends CameraActivity implements OnImage
   private static final String TF_OD_API_LABELS_FILE = "labelmap.txt";
   private static final DetectorMode MODE = DetectorMode.TF_OD_API;
   // Minimum detection confidence to track a detection.
-  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.65f;
+  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.7f;
   private static final boolean MAINTAIN_ASPECT = false;
   //private final Size DESIRED_PREVIEW_SIZE = new Size(width, height);
  private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
@@ -81,7 +76,6 @@ public class DetectorActivity<protect> extends CameraActivity implements OnImage
 
   private Classifier detector;
 
-  private long lastProcessingTimeMs;
   private Bitmap rgbFrameBitmap = null;
   private Bitmap croppedBitmap = null;
   private Bitmap cropCopyBitmap = null;
@@ -97,7 +91,6 @@ public class DetectorActivity<protect> extends CameraActivity implements OnImage
 
   private BorderedText borderedText;
 
-    List<Integer> valueX = new ArrayList<>();
 
 
   @Override
@@ -219,9 +212,9 @@ public class DetectorActivity<protect> extends CameraActivity implements OnImage
           public void run() {
 
             LOGGER.i("Running detection on image " + currTimestamp);
-            final long startTime = SystemClock.uptimeMillis();
+
             final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
-            lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
+
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
             final Canvas canvas = new Canvas(cropCopyBitmap);
@@ -240,7 +233,7 @@ public class DetectorActivity<protect> extends CameraActivity implements OnImage
 
             final List<Classifier.Recognition> mappedRecognitions =
                 new LinkedList<Classifier.Recognition>();
-            List<String> detected = new ArrayList<>();
+
             String position = "";
 
             for (final Classifier.Recognition result : results) {
@@ -256,46 +249,29 @@ public class DetectorActivity<protect> extends CameraActivity implements OnImage
                 }
 
                   float center_x = result.getLocation().centerY();
+                float screen_division = previewWidth/3;
 
-
-                  if (center_x <= (previewWidth/3)-20){
+                  if (center_x <= screen_division-20){
                       position = "right";
-//                      try {
-//                          speak(result.getTitle() +"right");
-//                          Thread.sleep(800);
-//                      } catch (InterruptedException e) {
-//                          e.printStackTrace();
-//                      }
 
                   }
-                  else if(center_x <= ((previewWidth / 3) * 2)-100){
+                  else if(center_x <= (screen_division * 2)-100){
                      position = "center";
-//                      try {
-//                          speak(result.getTitle() +" center");
-//                          Thread.sleep(800);
-//                      } catch (InterruptedException e) {
-//                          e.printStackTrace();
-//                      }
+
                   }
                   else {
                       position = "left";
-
-//                      try {
-//                          speak(result.getTitle() +" left");
-//                          Thread.sleep(800);
-//                      } catch (InterruptedException e) {
-//                          e.printStackTrace();
-//                      }
                   }
 
               }
 
 
             }
-
-              for (int i = 0; i < mappedRecognitions.size(); i++){
+            int number_of_results =   mappedRecognitions.size();
+              for (int i = 0; i < number_of_results ; i++){
+                  String className = mappedRecognitions.get(i).getTitle();
                   try {
-                      speak(mappedRecognitions.get(i).getTitle() + position);
+                      speak(className + position);
                       Thread.sleep(1000);
                   } catch (InterruptedException e) {
                       e.printStackTrace();
