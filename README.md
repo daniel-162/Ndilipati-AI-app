@@ -7,7 +7,8 @@ The goal of Ndilipati is to aid those with visual impairment to better interact 
 Application can run either on device or emulator.
 
 ## For GammaNdilipati
-The app uses tflite models which are build using gradle scripts and no need to download from somwhere else.
+The app uses tflite models which are build using gradle scripts and no need to download from somewhere else.
+Custom object detection tflite model can be trained and put in the assets folder with it's labelmap.
 ### requirements
 1. android studio
 2. android device and android environment with minimum API level 21.
@@ -18,6 +19,8 @@ The app uses tflite models which are build using gradle scripts and no need to d
 
 ## For BetaNdilipati
 The app uses yolo tiny models which are build by copying dnns folder to your android device.
+New yolo-v3 model and cfg can be placed in the dnns folder for custom object detection.
+In future the app will automatically download these files from the cloud at first launch.
 ### requirements
 1. android studio
 2. android device and android environment with minimum API level 28.
